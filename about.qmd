@@ -2,8 +2,14 @@
 title: "About"
 ---
 
-About this site
+# Welcome to Ashley's Quarto Webpage!
 
-```{r}
-1 + 1
-```
+![Lost in Bangkok - I rarely take selfies](images/IMG_0540.JPG){fig-align="center" width="300"}
+
+A tech enthusiast, a film lover, and a Youtube binge watcher. Used to be a traveler as well but have been paused during the pandemic. I have studied in 4 different regions, now growing up in Singapore.
+
+While working full-time, I am also a Master of IT in Business degree candidate at Singapore Management University, pursuing Analytics Track.
+
+I have solid experience in sensing different trends in Asia, along with sharp analytical eyes to the market. As a product planner in the tech industry, my area of focus varies from tech trends, media, and content, where I do both extensive research as well as liaise with different stakeholders.
+
+Let's Connect! [LinkedIn](https://www.linkedin.com/in/ashleysunhamchoi/)
