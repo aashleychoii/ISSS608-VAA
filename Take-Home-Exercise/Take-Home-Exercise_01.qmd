@@ -1,0 +1,60 @@
+---
+title: "Take Home Exercise 01"
+author: "Ashley Choi"
+---
+
+## **Exploring Singapore's Demographics**
+
+Create an age-sex pyramid to visualize Singapore's demographic structure.
+
+### **The Data**
+
+Singstat regularly releases its latest demographics data on its website. You may refer to this data for this task: Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2022.
+
+### **Step-by-Step Tableau Guide**
+
+I explored the dataset by putting Population in Columns and Age group in Rows.
+
+![](images/01.%20SUM%20population,%20Age%20Group.JPG){width="633"}
+
+To create an age pyramid by sex, we need to divide population sum by female and male.
+
+![](images/02.%20Created%20calculated%20field%20-%20Female.JPG){width="420"}
+
+By using the default "Population" field, I edited the formula to contain only female population. To create male population field, simply duplicate the female population field and change the code with "Male"
+
+![](images/02.%20Duplicate%20Population%20to%20create%20calculated%20field.JPG)
+
+Now we have both female annd population! Now, simply put these two fields under Column. How can we make this look like a pyramid?
+
+![](images/03.%20Put%20Female,%20Male%20population.JPG){width="674"}
+
+One way to do so is reverse the axis of female population chart. You can do it by right-clicking the chart and click on "reverse".
+
+![](images/04.%20Reverse%20to%20create%20a%20pyramid.JPG){width="640"}
+
+Once you reverse the axis, color the chart to differentiate female and male chart. Go to Marks and click Color. To analyze age & sex distribution by different planning area, you may add a filter to select the area that you want to focus on.
+
+![](images/06.%20Add%20filter.JPG)
+
+Sort the label axis to a descending order, so that the older age group comes on top. You can do this by right-clicking Age Group, and adjust Sort Order option. Change the sheet name so that it matches your filtered planning area.
+
+![](images/08.%20Make%20it%20pyramid.JPG){width="445"}
+
+I chose 9 planning areas to be plotted in Trellis Chart to lay out different areas distribution in one view. Before we move on, I erased axis labels and adjusted header size to save some space in the dashboard. Then, I duplicated 8 more tabs, applied different planning area, and named them accordingly.
+
+![](images/09.%20Duplicate.JPG)
+
+Tableau has a very useful function called Dashboard where you can put visualizations in different tabs in one sheet. Drag & drop planning areas in 3\*3, make them fit the screen. Note that the bar chart does not indicate absolute number. You may bring mouse cursor over to the chart and read the exact value from the marker.
+
+![](images/09.%20Make%20it%20pyramid.JPG)
+
+We have our age & sex pyramid in trellis chart, here are key findings -
+
+### **Findings**
+
+Downtown core has low elderly and kids group, instead has mostly 30\~40s who could afford expensive rent. Bukit Timah and Clementi have similar population patterns with high portion of children and teen agers. On the other hand, North-East area including Serangoon and Hougang has relatively higher distribution of senior population of age group above. 60.
+
+### **Suggestions**
+
+Business operators may choose Downtown cCore area to target expats or high-income residents with premiums services, such as fitness centres. Education centres may consider West area to improve learning facilities. In addition, North-East area would be a good choice to have more senior facilities.
