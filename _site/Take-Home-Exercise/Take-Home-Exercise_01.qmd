@@ -1,0 +1,35 @@
+---
+title: "Take-Home-Exercise_01"
+format: html
+editor: visual
+---
+
+## **Hi! Welcome to my first take-home exercise.**
+
+Let's explore Singapore's demographics by age, sex, and planning areas. For this task, I used Tableau to create an age-sex pyramid to visualize Singapore's demographic structure.
+
+**The Data**
+
+Singapore's data main-body, Singstat, regularly releases its latest demographics data on its website. You may refer to this data for this task: Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2022.
+
+**Step-by-Step Guide**
+
+Tableau is a great tool to intuitively craft visual analytics chart.
+
+**Findings**
+
+TBC
+
+**Suggestions**
+
+TBC
+
+***Task (For personal reference)***
+
+The Write-up
+
+The write-up of the take-home exercise should include but not limited to the followings:
+
+A reproducible description of the procedures used to prepare the analytical visualisation. Please refer to the senior submission I shared for example 1 and 2.
+
+A write-up of not more than 500 words to discuss the patterns reveal by the analytical visualisation prepared.
