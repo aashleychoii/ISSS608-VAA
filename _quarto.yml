@@ -12,7 +12,7 @@ website:
       - text: "Take-home Exercise"
         menu:
           - text: "Take-home Exercise 1"
-          - href: "Take-Home-Exercise/Take-Home-Exercise_01.html"
+            href: "Take-Home-Exercise/Take-Home-Exercise_01.html"
     right: 
       - href: index.qmd
         text: Home
