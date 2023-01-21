@@ -1,0 +1,13 @@
+---
+title: "Hands-on_Ex02"
+---
+
+```{r}
+pacman::p_load(tidyverse, patchwork, 
+               ggthemes, hrbrthemes,
+               ggrepel)
+```
+
+```{r}
+exam_data <- read_csv("data/Exam_data.csv")
+```
