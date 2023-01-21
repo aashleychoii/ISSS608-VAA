@@ -25,7 +25,7 @@ By using the default "Population" field, I edited the formula to contain only fe
 
 ![](images/02.%20Duplicate%20Population%20to%20create%20calculated%20field.JPG)
 
-Now we have both female annd population! Now, simply put these two fields under Column. How can we make this look like a pyramid?
+Now we have both female and population! Now, simply put these two fields under Column. How can we make this look like a pyramid?
 
 ![](images/03.%20Put%20Female,%20Male%20population.JPG){width="674"}
 
@@ -53,14 +53,13 @@ We have our age & sex pyramid in trellis chart, here are key findings -
 
 ### **Findings**
 
-Selected 9 areas can be grouped by similar sub-categories as per their location and geographic characteristics -- Town (Downtown Core, Newton), West (Bukit Timah, Clementi), North-East (Serangoon,
-Hougang), East (Tampines, Changi), and North (Sembawang).
+Selected 9 areas can be grouped by similar sub-categories as per their location and geographic characteristics -- Town (Downtown Core, Newton), West (Bukit Timah, Clementi), North-East (Serangoon, Hougang), East (Tampines, Changi), and North (Sembawang).
 
-Downtown core has low elderly and kids\' group, instead has mostly 30\~40s. Downtown core area has private residences targeting expats or high-income businesses. Therefore, the population pattern shows extremely low percentage of seniors and young kids. Population pattern shows that residents here are in their prime period of career path, which aligns with age group of 30\~40s who could afford expensive rent. Among the rest of 8 planning areas, Newton shows the most similar pattern as Downtown Core. However, it has high percentage of middle age, and quite a lot of kids and teenagers. This pattern indicates that Newton has family-unit residents.
+Downtown core has low elderly and kids' group, instead has mostly 30\~40s. Downtown core area has private residences targeting expats or high-income businesses. Therefore, the population pattern shows extremely low percentage of seniors and young kids. Population pattern shows that residents here are in their prime period of career path, which aligns with age group of 30\~40s who could afford expensive rent. Among the rest of 8 planning areas, Newton shows the most similar pattern as Downtown Core. However, it has high percentage of middle age, and quite a lot of kids and teenagers. This pattern indicates that Newton has family-unit residents.
 
 Bukit Timah and Clementi have similar population patterns with high portion of children and teenagers, as well as middle age. At the same time, they have quite a lot of 20s population as well. The pattern could be due to institutes near these planning areas, such as NUS, SIM, and polytechnics. Between Bukit Timah and Clementi, Clementi has more senior population, resulting in shorter bars for age groups below 20s.
 
-Similarly, North-East area including Serangoon and Hougang has relatively higher distribution of senior population of age group above. 60. Together with Tampines, these areas have distinct pattern of \"Star-shape.\" There are distinctively standing out age groups with age interval of thirty years. For example, in Tampines, age group of 30 to 34 stands out, and similarly age group of 60 to 64 stands out. This may indicate that star-shape area may have bigger residences which could accommodate three generation families -- grandparents, young parents, and their kids.
+Similarly, North-East area including Serangoon and Hougang has relatively higher distribution of senior population of age group above. 60. Together with Tampines, these areas have distinct pattern of "Star-shape." There are distinctively standing out age groups with age interval of thirty years. For example, in Tampines, age group of 30 to 34 stands out, and similarly age group of 60 to 64 stands out. This may indicate that star-shape area may have bigger residences which could accommodate three generation families -- grandparents, young parents, and their kids.
 
 In Changi area, it is difficult to generalize the result of pattern as its absolute population is smaller than the rest of others, however, it still has unique pattern of higher population in middle age, could be the result of different gender distribution of logistics and aviation industry.
 
