@@ -1,0 +1,31 @@
+---
+title: "Take-Home-Exercise_02"
+---
+
+For this Take-Home Exercise 2, I would like to introduce how we can make the visualization of take-home exercise 1 better in terms of clarity and aesthetics.
+
+For a recap, exercise 1's task was to create a trellis chart of age & gender pyramids in 9 selected planning areas.
+
+![How can we improve visualization?](images/Yiman_Chen_Peer_Critic.JPG){fig-alt="Peer_Critic"}
+
+Although this visualization has managed to plot pyramids by different planning area, there are still some rooms to improve to make it look better!
+
+**Clarity**
+
+From the perspective of the audience who first read this chart, they may not be familiar with the terms used in the chart. Therefore, it would be desirable to spell out acronyms, such as "Planning Area" instead of "PA". In addition, title can also be improved to deliver the original intention of the task. For example, simple and clear title such as "Singapore's Age and Sex Pattern by Planning Area" could be good enough. Last but not least, adding footnotes or descriptions to make the chart more understandable could be another way to improve the clarity of this visualization.
+
+**Aesthetics**
+
+There are mainly two issues with this visualization: First, it is hard to tell female and male bars from each pyramid. Second, repeated labels make the visualization less readable. In this article, I will suggest an improved visualization by using ggplot and tidyverse.
+
+What to do:
+
+-   select one of the Take-home Exercise 1 prepared by your classmate,
+
+-   critic the submission in terms of clarity and aesthetics,
+
+-   prepare a sketch for the alternative design by using the data visualisation design principles and best practices you had learned in Lesson 1 and 2, and
+
+-   remake the original design by using ggplot2, ggplot2 extensions and tidyverse packages.
+
+-   The purpose of DataVis Makeover is to improve on the original visualisation. Focus on what works, what doesn't work, why those things don't work, and how you made it better. You should try stick to the fields in the data set provided and improve upon the original visualisation.
