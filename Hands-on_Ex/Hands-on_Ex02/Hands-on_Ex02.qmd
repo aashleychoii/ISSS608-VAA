@@ -1,5 +1,7 @@
 ---
 title: "Hands-on_Ex02"
+author: "Ashley Choi"
+date: "`r Sys.Date()`"
 ---
 
 ```{r}
@@ -8,6 +10,14 @@ pacman::p_load(tidyverse, patchwork,
                ggrepel)
 ```
 
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+```
+
 ```{r}
 exam_data <- read_csv("data/Exam_data.csv")
 ```
+
