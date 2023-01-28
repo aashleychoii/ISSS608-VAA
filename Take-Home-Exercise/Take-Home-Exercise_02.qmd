@@ -1,8 +1,14 @@
 ---
 title: "Take-Home-Exercise_02"
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
 ---
 
 For this Take-Home Exercise 2, I would like to introduce how we can make the visualization of take-home exercise 1 better in terms of clarity and aesthetics.
+
+## Problem Statement
 
 For a recap, exercise 1's task was to create a trellis chart of age & gender pyramids in 9 selected planning areas.
 
@@ -18,11 +24,17 @@ From the perspective of the audience who first read this chart, they may not be 
 
 There are mainly two issues with this visualization: First, it is hard to tell female and male bars from each pyramid. Second, repeated labels make the visualization less readable. In this article, I will suggest an improved visualization by using ggplot and tidyverse.
 
+## **Importing the data**
+
+First, start from loading tidyverse and importing dataset.
+
 ```{r}
 pacman::p_load(tidyverse)
 ```
 
-## Importing the data
+In this task, I used *Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2022* published by Department of Statistics, Singapore.
+
+I removed null data and wrong category from the csv file, and rebinded male and female dataset.
 
 ```{r}
 # prepare cleaned data
@@ -30,199 +42,342 @@ male_pop <- read_csv("data/Male_Pop_June_2022.csv")
 female_pop <- read_csv("data/Female_Pop_June_2022.csv")
 
 # removed null data, wrong category
-
 # bind and inspect data
 
 total_pop <- rbind(male_pop, female_pop)
 
-head(total_pop)
-
 ```
 
-### Frequency
+![Data Cleaning Result](images/01.%20Data%20Cleaning.JPG)
+
+Then, need to aggregate and leave necessary columns only for easier analysis.
 
 ```{r}
 freq_pop <- total_pop %>%
-  group_by(`Sex`, `AG`, `Time`, `PA`) %>%
+  group_by(`Sex`, `AG`, `PA`) %>%
   summarise('Count'= sum(`Population`)) %>%
   ungroup()
-
-freq_pop$Time = as.integer(freq_pop$Time)
-
-head(freq_pop)
-
 ```
+
+![Frequency Aggregation](images/02.%20Frequency.JPG)
+
+In this practice, I chose Ang Mo Kio, Bedok, Bukit Panjang, Clementi, Choa Chu Kang, Hougang, Jurong East, Serangoon, and Tampines. Here are steps to improve visualization, with Ang Mo Kio example.
+
+## Step-by-Step Plotting
+
+**Ang Mo Kio**
+
+Filter the dataset by PA == "Ang Mo Kio", then see how the plot looks like with female dataset.
 
 ```{r}
-no_pop <- freq_pop %>%
-  select(`PA`, `Count`) %>%
-  group_by(PA) %>%
-  summarise(Total=sum(`Count`)) %>%
-  filter(Total == 0) %>%
-  select(PA) %>%
-  ungroup
+# get AMK first
 
-no_pop_list <- as.vector(no_pop$PA)
+amk_pop <- freq_pop %>%
+  filter(PA == "Ang Mo Kio")
 
-new_pop <- freq_pop %>%
-  filter(!PA %in% no_pop_list)
+amk_pop_female <- freq_pop %>%
+  filter(Sex == "Female", PA == "Ang Mo Kio")
 
-new_pop
+ggplot(amk_pop_female,
+       aes(x = Count,
+           y = AG,
+           fill = PA)) + 
+  geom_col()
 
 ```
 
+Let's see how to plot male data. You may use convert the x axis in negative value to switch the axis direction.
 
 ```{r}
-order <- c("0-4", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90 & Over")
+amk_pop_male <- freq_pop %>%
+  filter(Sex == "Male", PA == "Ang Mo Kio")
 
-sorted_pop <- new_pop %>%
-  mutate(`AG` =  factor(`AG`, levels = order)) %>%
-  arrange(`AG`)
-
-sorted_pop$nCount = ifelse(sorted_pop$Sex == "Male", 
-                                 yes = -sorted_pop$Count, 
-                                 no = sorted_pop$Count)
-
-sorted_pop
+ggplot(amk_pop_male,
+       aes(x = -Count,
+           y = AG,
+           fill = PA)) + 
+  geom_col()
 ```
+
+Now, let's put them together and see how age & sex pyramid looks like.
 
 ```{r}
-p <- ggplot(sorted_pop, aes(x = ifelse(Sex == "Male", yes = -Count, no = Count), 
-                          y = AG, fill = Sex)) + 
-  geom_col() +
-  scale_x_continuous(breaks = seq(-150000, 150000, 50000), 
-                     labels = paste0(as.character(c(seq(150, 0, -50), seq(50, 150, 50))),"k")) +
-  labs (x = "Population", y = "Age", title='Singapore Age-Sex Population Pyramid 2021') +
-  theme_bw() +
-  theme(axis.ticks.y = element_blank()) +
-  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "lightpink"))
-p
+amk_pyramid <- amk_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+amk_plot <- 
+  ggplot(amk_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex)) +
+    geom_col() 
+
+amk_plot # to get the final pyramid
 ```
 
+As we will need to put each chart together, let's remove overlapping labels and legend.
 
 ```{r}
-### Reference only!!
+amk_plot <- 
+  ggplot(amk_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Ang Mo Kio")
 
-year_list <- list()
-for (i in 1:length(unique(sorted_pop$Time))) { 
-  year_list[[i]] <- list(method = "restyle",
-                         args = list("transforms[0].value", unique(sorted_pop$Time)[i]),
-                         label = unique(sorted_pop$Time)[i])
-}
-
-PA_list <- list()
-for (j in 1:length(unique(sorted_pop$PA))) { 
-  PA_list[[j]] <- list(method = "restyle",
-                        args = list("transforms[1].value", unique(sorted_pop$PA)[j]),
-                        label = unique(sorted_pop$PA)[j])
-}
-
-annot <- list(list(text = "Select Planning Area:",
-                   x = 1.61,
-                   y = 0.78,
-                   xref = 'paper',
-                   yref = 'paper',
-                   showarrow = FALSE))
+amk_plot
 ```
+
+Similarly, you can create 8 other plots using the same method. In this practice, I chose Bedok, Bukit Panjang, Clementi, Choa Chu Kang, Hougang, Jurong East, Serangoon, and Tampines.
+
+**Bedok**
 
 ```{r}
-library(plotly)
+# Bedok
+bedok_pop <- freq_pop %>%
+  filter(PA == "Bedok")
+
+bedok_pyramid <- bedok_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+bedok_plot <- 
+  ggplot(bedok_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Bedok")
 ```
+
+**Bukit Panjang**
 
 ```{r}
-### Reference
-plot_ly(sorted_pop, x = ~nCount, y = ~AG,
-        type = 'bar', 
-        orientation = 'h',
-        color = ~Sex,
-        colors = c("lightpink", "lightblue"),
-        transforms = list(list(type = 'filter',
-                               target = ~Time,
-                               operation = '=',
-                               value = unique(sorted_pop$Time)[1]),
-                          list(type = 'filter',
-                               target = ~PA,
-                               operation = '=',
-                               value = unique(sorted_pop$PA)[1]))
-                          )%>%
-  layout(autosize = F, bargap = 0.1, barmode = 'overlay',
-         xaxis = list(title = "Population",
-                      tickmode = 'array', tickvals = c(-10000, -8000, -6000, -4000, -2000, 0, 
-                                                       2000, 4000, 6000, 8000, 10000),
-                      ticktext = c('10k', '8k', '6k', '4k', '2k', '0', 
-                                   '2k', '4k', '6k', '8k', '10k')),
-         yaxis = list(title = "Age Group"),
-         title = 'Singapore Age-Sex Population Pyramid',
-         updatemenus = list(list(type = 'dropdown',
-                                 x = 1.6, y = 0.7,
-                                 buttons = PA_list)
-                            ),
-         sliders = list(list(
-                          active = 1, 
-                          currentvalue = list(prefix = "Year: "), 
-                          pad = list(t = 60), 
-                          steps = year_list)), 
-         annotations = annot)
+# Bukit Panjang
+bk_pj_pop <- freq_pop %>%
+  filter(PA == "Bukit Panjang")
+
+bk_pj_pyramid <- bk_pj_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+bk_pj_plot <- 
+  ggplot(bk_pj_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Bukit Panjang")
 ```
 
-
+**Clementi**
 
 ```{r}
-### Reference
-plot_ly(sorted_pop, 
-        x = ~nCount, 
-        y = ~AG,
-        type = 'bar', 
-        orientation = 'h',
-        hovertemplate = ~paste("<br>Age Group:", AG,
-                               "<br>Gender:", Sex,
-                               "<br>Population:", Count),
-        color = ~Sex,
-        colors = c("lightpink", "lightblue"),
-        transforms = list(list(type = 'filter',
-                               target = ~Time,
-                               operation = '=',
-                               value = unique(sorted_pop$Time)[1]),
-                          list(type = 'filter',
-                               target = ~PA,
-                               operation = '=',
-                               value = unique(sorted_pop$PA)[1]))
-                          )%>%
-  layout(autosize = F, bargap = 0.1, barmode = 'overlay',
-         xaxis = list(title = "Population",
-                      tickmode = 'array', tickvals = c(-10000, -8000, -6000, -4000, -2000, 0, 
-                                                       2000, 4000, 6000, 8000, 10000),
-                      ticktext = c('10k', '8k', '6k', '4k', '2k', '0', 
-                                   '2k', '4k', '6k', '8k', '10k')),
-         yaxis = list(title = "Age Group"),
-         title = 'Singapore Age-Sex Population Pyramid',
-         updatemenus = list(list(type = 'dropdown',
-                                 x = 1.6, y = 0.7,
-                                 buttons = PA_list)
-                            ),
-         sliders = list(list(
-                          active = 1, 
-                          currentvalue = list(prefix = "Year: "), 
-                          pad = list(t = 60), 
-                          steps = year_list)), 
-         annotations = annot)
+# Clementi
+clementi_pop <- freq_pop %>%
+  filter(PA == "Clementi")
+
+clementi_pyramid <- clementi_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+clementi_plot <- 
+  ggplot(clementi_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Clementi")
 
 ```
 
+**Choa Chu Kang**
 
 ```{r}
+# Choa Chu Kang
+cck_pop <- freq_pop %>%
+  filter(PA == "Choa Chu Kang")
 
+cck_pyramid <- cck_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+cck_plot <- 
+  ggplot(cck_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Choa Chu Kang")
 ```
 
+**Hougang**
 
-What to do:
+```{r}
+# Hougang
+hougang_pop <- freq_pop %>%
+  filter(PA == "Hougang")
 
--   select one of the Take-home Exercise 1 prepared by your classmate,
+hougang_pyramid <- hougang_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
 
--   critic the submission in terms of clarity and aesthetics,
+hougang_plot <- 
+  ggplot(hougang_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Hougang") 
+```
 
--   prepare a sketch for the alternative design by using the data visualisation design principles and best practices you had learned in Lesson 1 and 2, and
+**Jurong East**
 
--   remake the original design by using ggplot2, ggplot2 extensions and tidyverse packages.
+```{r}
+# Jurong East
+jr_est_pop <- freq_pop %>%
+  filter(PA == "Jurong East")
 
--   The purpose of DataVis Makeover is to improve on the original visualisation. Focus on what works, what doesn't work, why those things don't work, and how you made it better. You should try stick to the fields in the data set provided and improve upon the original visualisation.
+jr_est_pyramid <- jr_est_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+jr_est_plot <- 
+  ggplot(jr_est_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Jurong East")
+```
+
+**Serangoon**
+
+```{r}
+# Serangoon
+srgoon_pop <- freq_pop %>%
+  filter(PA == "Serangoon")
+
+srgoon_pyramid <- srgoon_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+srgoon_plot <- 
+  ggplot(srgoon_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Serangoon")
+```
+
+**Tampines**
+
+```{r}
+# Tampines
+
+tamp_pop <- freq_pop %>%
+  filter(PA == "Tampines")
+
+tamp_pyramid <- tamp_pop %>%
+  mutate(
+    Count = case_when(
+      Sex == "Male" ~ -Count,
+      TRUE ~ Count
+    ))
+
+tamp_plot <- 
+  ggplot(tamp_pyramid,
+         aes(x = Count,
+             y = AG,
+             fill = Sex), show.legend=FALSE) +
+    geom_col() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          legend.position = "none") + 
+    ggtitle("Tampines")
+```
+
+## Trellis Chart
+
+Now we have 9 separate pyramids, let's put them in one view using **patchwork**.
+
+You may use following code to download patchwork package.
+
+**devtools::install_github("thomasp85/patchwork")**
+
+```{r}
+library(ggplot2)
+library(patchwork)
+```
+
+Once you have patchwork ready, you can put 9 pyramids together, and add title!
+
+```{r}
+patchwork <- (amk_plot | bedok_plot | bk_pj_plot)/
+  (clementi_plot | cck_plot | hougang_plot)/
+  (jr_est_plot | srgoon_plot | tamp_plot)
+
+patchwork + plot_annotation(
+  title = 'Singapore Age and Sex Pattern by Planning Area')
+```
+
+In this exercise, the initial visualization has been improved in terms of clarity and aesthetics by:
+
+-   Adding appropriate title and planning area
+
+-   Separating female and male with different colors for easier comparison
+
+-   Removing axis title for cleaner view
+
+-   Putting 9 pyramid plots in 1 view
