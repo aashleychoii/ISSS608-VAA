@@ -18,6 +18,203 @@ From the perspective of the audience who first read this chart, they may not be 
 
 There are mainly two issues with this visualization: First, it is hard to tell female and male bars from each pyramid. Second, repeated labels make the visualization less readable. In this article, I will suggest an improved visualization by using ggplot and tidyverse.
 
+```{r}
+pacman::p_load(tidyverse)
+```
+
+## Importing the data
+
+```{r}
+# prepare cleaned data
+male_pop <- read_csv("data/Male_Pop_June_2022.csv")
+female_pop <- read_csv("data/Female_Pop_June_2022.csv")
+
+# removed null data, wrong category
+
+# bind and inspect data
+
+total_pop <- rbind(male_pop, female_pop)
+
+head(total_pop)
+
+```
+
+### Frequency
+
+```{r}
+freq_pop <- total_pop %>%
+  group_by(`Sex`, `AG`, `Time`, `PA`) %>%
+  summarise('Count'= sum(`Population`)) %>%
+  ungroup()
+
+freq_pop$Time = as.integer(freq_pop$Time)
+
+head(freq_pop)
+
+```
+
+```{r}
+no_pop <- freq_pop %>%
+  select(`PA`, `Count`) %>%
+  group_by(PA) %>%
+  summarise(Total=sum(`Count`)) %>%
+  filter(Total == 0) %>%
+  select(PA) %>%
+  ungroup
+
+no_pop_list <- as.vector(no_pop$PA)
+
+new_pop <- freq_pop %>%
+  filter(!PA %in% no_pop_list)
+
+new_pop
+
+```
+
+
+```{r}
+order <- c("0-4", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80-84", "85-89", "90 & Over")
+
+sorted_pop <- new_pop %>%
+  mutate(`AG` =  factor(`AG`, levels = order)) %>%
+  arrange(`AG`)
+
+sorted_pop$nCount = ifelse(sorted_pop$Sex == "Male", 
+                                 yes = -sorted_pop$Count, 
+                                 no = sorted_pop$Count)
+
+sorted_pop
+```
+
+```{r}
+p <- ggplot(sorted_pop, aes(x = ifelse(Sex == "Male", yes = -Count, no = Count), 
+                          y = AG, fill = Sex)) + 
+  geom_col() +
+  scale_x_continuous(breaks = seq(-150000, 150000, 50000), 
+                     labels = paste0(as.character(c(seq(150, 0, -50), seq(50, 150, 50))),"k")) +
+  labs (x = "Population", y = "Age", title='Singapore Age-Sex Population Pyramid 2021') +
+  theme_bw() +
+  theme(axis.ticks.y = element_blank()) +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "lightpink"))
+p
+```
+
+
+```{r}
+### Reference only!!
+
+year_list <- list()
+for (i in 1:length(unique(sorted_pop$Time))) { 
+  year_list[[i]] <- list(method = "restyle",
+                         args = list("transforms[0].value", unique(sorted_pop$Time)[i]),
+                         label = unique(sorted_pop$Time)[i])
+}
+
+PA_list <- list()
+for (j in 1:length(unique(sorted_pop$PA))) { 
+  PA_list[[j]] <- list(method = "restyle",
+                        args = list("transforms[1].value", unique(sorted_pop$PA)[j]),
+                        label = unique(sorted_pop$PA)[j])
+}
+
+annot <- list(list(text = "Select Planning Area:",
+                   x = 1.61,
+                   y = 0.78,
+                   xref = 'paper',
+                   yref = 'paper',
+                   showarrow = FALSE))
+```
+
+```{r}
+library(plotly)
+```
+
+```{r}
+### Reference
+plot_ly(sorted_pop, x = ~nCount, y = ~AG,
+        type = 'bar', 
+        orientation = 'h',
+        color = ~Sex,
+        colors = c("lightpink", "lightblue"),
+        transforms = list(list(type = 'filter',
+                               target = ~Time,
+                               operation = '=',
+                               value = unique(sorted_pop$Time)[1]),
+                          list(type = 'filter',
+                               target = ~PA,
+                               operation = '=',
+                               value = unique(sorted_pop$PA)[1]))
+                          )%>%
+  layout(autosize = F, bargap = 0.1, barmode = 'overlay',
+         xaxis = list(title = "Population",
+                      tickmode = 'array', tickvals = c(-10000, -8000, -6000, -4000, -2000, 0, 
+                                                       2000, 4000, 6000, 8000, 10000),
+                      ticktext = c('10k', '8k', '6k', '4k', '2k', '0', 
+                                   '2k', '4k', '6k', '8k', '10k')),
+         yaxis = list(title = "Age Group"),
+         title = 'Singapore Age-Sex Population Pyramid',
+         updatemenus = list(list(type = 'dropdown',
+                                 x = 1.6, y = 0.7,
+                                 buttons = PA_list)
+                            ),
+         sliders = list(list(
+                          active = 1, 
+                          currentvalue = list(prefix = "Year: "), 
+                          pad = list(t = 60), 
+                          steps = year_list)), 
+         annotations = annot)
+```
+
+
+
+```{r}
+### Reference
+plot_ly(sorted_pop, 
+        x = ~nCount, 
+        y = ~AG,
+        type = 'bar', 
+        orientation = 'h',
+        hovertemplate = ~paste("<br>Age Group:", AG,
+                               "<br>Gender:", Sex,
+                               "<br>Population:", Count),
+        color = ~Sex,
+        colors = c("lightpink", "lightblue"),
+        transforms = list(list(type = 'filter',
+                               target = ~Time,
+                               operation = '=',
+                               value = unique(sorted_pop$Time)[1]),
+                          list(type = 'filter',
+                               target = ~PA,
+                               operation = '=',
+                               value = unique(sorted_pop$PA)[1]))
+                          )%>%
+  layout(autosize = F, bargap = 0.1, barmode = 'overlay',
+         xaxis = list(title = "Population",
+                      tickmode = 'array', tickvals = c(-10000, -8000, -6000, -4000, -2000, 0, 
+                                                       2000, 4000, 6000, 8000, 10000),
+                      ticktext = c('10k', '8k', '6k', '4k', '2k', '0', 
+                                   '2k', '4k', '6k', '8k', '10k')),
+         yaxis = list(title = "Age Group"),
+         title = 'Singapore Age-Sex Population Pyramid',
+         updatemenus = list(list(type = 'dropdown',
+                                 x = 1.6, y = 0.7,
+                                 buttons = PA_list)
+                            ),
+         sliders = list(list(
+                          active = 1, 
+                          currentvalue = list(prefix = "Year: "), 
+                          pad = list(t = 60), 
+                          steps = year_list)), 
+         annotations = annot)
+
+```
+
+
+```{r}
+
+```
+
+
 What to do:
 
 -   select one of the Take-home Exercise 1 prepared by your classmate,
