@@ -19,3 +19,13 @@ plot_ly(data = exam_data, # don't have to define aes(), but need to add ~
         y = ~MATHS, 
         color = ~RACE) #<<
 ```
+
+```{r}
+p <- ggplot(data=exam_data, 
+            aes(x = MATHS,
+                y = ENGLISH)) +
+  geom_point(dotsize = 1) +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100))
+ggplotly(p) #<<
+```
