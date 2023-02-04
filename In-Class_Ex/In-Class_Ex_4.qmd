@@ -1,0 +1,21 @@
+---
+title: "In-Class Exercise_4"
+date: "4 February 2023"
+date-meta: "r Systems.Date()"
+Format: html
+---
+
+```{r}
+pacman::p_load(plotly, DT, patchwork, tidyverse)
+```
+
+```{r}
+exam_data <- read_csv("data/Exam_data.csv")
+```
+
+```{r}
+plot_ly(data = exam_data, # don't have to define aes(), but need to add ~
+        x = ~ENGLISH, 
+        y = ~MATHS, 
+        color = ~RACE) #<<
+```

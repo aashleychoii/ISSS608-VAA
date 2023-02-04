@@ -75,5 +75,12 @@
     "title": "Take-Home-Exercise_02",
     "section": "Trellis Chart",
     "text": "Trellis Chart\nNow we have 9 separate pyramids, let’s put them in one view using patchwork.\nYou may use following code to download patchwork package.\ndevtools::install_github(“thomasp85/patchwork”)\n\n\nShow the code\nlibrary(ggplot2)\nlibrary(patchwork)\n\n\nOnce you have patchwork ready, you can put 9 pyramids together, and add title!\n\n\nShow the code\npatchwork <- (amk_plot | bedok_plot | bk_pj_plot)/\n  (clementi_plot | cck_plot | hougang_plot)/\n  (jr_est_plot | srgoon_plot | tamp_plot)\n\npatchwork + plot_annotation(\n  title = 'Singapore Age and Sex Pattern by Planning Area')\n\n\n\n\n\nIn this exercise, the initial visualization has been improved in terms of clarity and aesthetics by:\n\nAdding appropriate title and planning area\nSeparating female and male with different colors for easier comparison\nRemoving axis title for cleaner view\nPutting 9 pyramid plots in 1 view"
+  },
+  {
+    "objectID": "In-Class_Ex/In-Class_Ex_4.html",
+    "href": "In-Class_Ex/In-Class_Ex_4.html",
+    "title": "In-Class Exercise_4",
+    "section": "",
+    "text": "pacman::p_load(plotly, DT, patchwork, tidyverse)\n\n\nexam_data <- read_csv(\"data/Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\n\nplot_ly(data = exam_data, # don't have to define aes(), but need to add ~\n        x = ~ENGLISH, \n        y = ~MATHS, \n        color = ~RACE) #<<\n\nNo trace type specified:\n  Based on info supplied, a 'scatter' trace seems appropriate.\n  Read more about this trace type -> https://plotly.com/r/reference/#scatter\n\n\nNo scatter mode specifed:\n  Setting the mode to markers\n  Read more about this attribute -> https://plotly.com/r/reference/#scatter-mode"
   }
 ]
