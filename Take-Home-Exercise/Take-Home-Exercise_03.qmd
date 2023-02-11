@@ -1,0 +1,66 @@
+---
+title: "Take-Home-Exercise_03"
+---
+
+```{r}
+pacman::p_load(plotly, DT, patchwork, ggstatsplot, tidyverse)
+```
+
+```{r}
+data <- read_csv("data/resale-flat-prices-based-on-registration-date-from-jan-2017-onwards.csv")
+resale_data <- filter(data, flat_type== "3 ROOM" | flat_type== "4 ROOM" | flat_type== "5 ROOM")
+resale_data
+  
+```
+
+```{r}
+library(ggplot2)
+# data aggregation
+
+# Grouped
+p1 <- ggplot(resale_data, aes(fill=flat_type, y=resale_price, x=town)) + 
+    geom_bar(position="dodge", stat = "summary", fun = "mean")
+
+p1
+
+```
+
+```{r}
+# library(viridis)
+# library(hrbrthemes)
+p2 <- ggplot(resale_data, aes(fill=flat_type, y=resale_price, x=town)) + 
+    geom_bar(position="stack", stat="identity") +
+    #scale_fill_viridis(discrete = T) +
+    ggtitle("Resale Price by Singapore Town") +
+   # theme_ipsum() +
+    xlab("")
+
+p2
+
+```
+
+```{r}
+
+
+
+```
+
+```{r}
+
+
+```
+
+https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2
+
+
+to uncover the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore by using appropriate analytical visualisation techniques learned in Lesson 4: Fundamentals of Visual Analytics. Students are encouraged to apply appropriate interactive techniques to enhance user and data discovery experiences.
+
+For the purpose of this study, the focus should be on 3-ROOM, 4-ROOM and 5-ROOM types. You can choose to focus on either one housing type or multiple housing types. The study period should be on 2022.
+
+The write-up of the take-home exercise should include but not limited to the followings:
+
+-   Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.
+
+-   A reproducible description of the procedures used to prepare the analytical visualisation. Please refer to the peer submission I shared.
+
+-   A write-up of not more than 100 words to discuss the patterns reveal by each analytical visualisation prepared.
