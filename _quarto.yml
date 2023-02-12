@@ -24,11 +24,11 @@ website:
       - text: "Take-home Exercise"
         menu:
           - text: "Take-home Exercise 1"
-            href: "Take-Home-Exercise/Take-Home-Exercise_01/Take-Home-Exercise_01.html"
+            href: "Take-Home-Exercise/Take-Home-Exercise_01.html"
           - text: "Take-home Exercise 2"
-            href: "Take-Home-Exercise/Take-Home-Exercise_02/Take-Home-Exercise_02.html"
+            href: "Take-Home-Exercise/Take-Home-Exercise_02.html"
           - text: "Take-home Exercise 3"
-            href: "Take-Home-Exercise/Take-Home-Exercise_03/Take-Home-Exercise_03.html"
+            href: "Take-Home-Exercise/Take-Home-Exercise_03.html"
     right: 
       - href: index.qmd
         text: Home
