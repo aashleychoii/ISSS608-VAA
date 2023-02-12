@@ -8,40 +8,83 @@ pacman::p_load(plotly, DT, patchwork, ggstatsplot, tidyverse)
 
 ```{r}
 data <- read_csv("data/resale-flat-prices-based-on-registration-date-from-jan-2017-onwards.csv")
-resale_data <- filter(data, flat_type== "3 ROOM" | flat_type== "4 ROOM" | flat_type== "5 ROOM")
+resale_data <- data %>%
+  mutate(region = 
+           case_when(town %in% c("ANG MO KIO", "HOUGANG", "PUNGGOL", "SERANGOON", "SENGKANG") ~ "North-East",
+                     town %in% c("BISHAN", "BUKIT MERAH", "BUKIT TIMAH", "CENTRAL AREA", "GEYLANG", "KALLANG/WHAMPOA", "MARINE PARADE", "QUEENSTOWN", "TOA PAYOH") ~ "Central",
+                     town %in% c("BEDOK", "PASIR RIS", "TAMPINES") ~ "East",
+                     town %in% c("SEMBAWANG", "WOODLANDS", "YISHUN") ~ "North",
+                     town %in% c("BUKIT BATOK", "BUKIT PANJANG", "CHOA CHU KANG", "CLEMENTI", "JURONG EAST", "JURONG WEST") ~ "West")) %>%
+  filter(flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM")) %>%
+  filter(month >= '2022-01' & month <='2022-12')
+
 resale_data
   
 ```
 
+Assumption
+
+-   No segmentation in housing types; just multiple, only segmentation is in room type (3-room, 4-room, 5-room)
+
+-   Study focusing on 2022 only
+
+-   Q. Can I segment each town by ... region?
+
+
 ```{r}
 library(ggplot2)
+library(plotly)
 # data aggregation
 
 # Grouped
-p1 <- ggplot(resale_data, aes(fill=flat_type, y=resale_price, x=town)) + 
+p1 <- ggplot(resale_data, aes(fill=flat_type, y=resale_price, x=region)) + 
     geom_bar(position="dodge", stat = "summary", fun = "mean")
+
+ggplotly(p1, tooltips = c("x", "y", "fill"))
 
 p1
 
 ```
+Pattern: 
+
+```{r}
+library(plotly)
+
+p2 <- ggplot(data=resale_data, aes(x=region, y=resale_price, fill=flat_type)) +
+  geom_boxplot()
+
+ggplotly(p2, tooltips = c("x", "y", "fill", "Town:", "Town:", paste("Town:", town), "Resale Price:", "Resale Price:", paste("Resale Price:", resale_price)))
+
+               
+p2
+```
+
 
 ```{r}
 # library(viridis)
 # library(hrbrthemes)
-p2 <- ggplot(resale_data, aes(fill=flat_type, y=resale_price, x=town)) + 
-    geom_bar(position="stack", stat="identity") +
-    #scale_fill_viridis(discrete = T) +
-    ggtitle("Resale Price by Singapore Town") +
-   # theme_ipsum() +
-    xlab("")
+# sales count by each town>>make it 100% stacked bar plot
 
-p2
+p3 <- ggplot(resale_data, aes(fill = flat_type, y = ..count.., x = region)) +
+  geom_bar(position = "fill", stat = "count") +
+  ggtitle("Resale Types by Singapore Region")
+
+p3
 
 ```
 
+
+
 ```{r}
 
-
+p4 <- ggscatterstats(
+  data = resale_data,
+  x = lease_commence_date,
+  y = resale_price,
+  marginal = FALSE,
+  )
+ggplotly(p4, tooltips = c("x", "y", "text"))
+p4
 
 ```
 
@@ -52,10 +95,12 @@ p2
 
 https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2
 
+https://bookdown.org/kdonovan125/ibis_data_analysis_r4/creating-graphs-with-ggplot2.html
+
 
 to uncover the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore by using appropriate analytical visualisation techniques learned in Lesson 4: Fundamentals of Visual Analytics. Students are encouraged to apply appropriate interactive techniques to enhance user and data discovery experiences.
 
-For the purpose of this study, the focus should be on 3-ROOM, 4-ROOM and 5-ROOM types. You can choose to focus on either one housing type or multiple housing types. The study period should be on 2022.
+For the purpose of this study, the focus should be on **3-ROOM, 4-ROOM and 5-ROOM types**. You can **choose to focus on either one housing type or multiple housing types.** The study period should be on **2022**.
 
 The write-up of the take-home exercise should include but not limited to the followings:
 
