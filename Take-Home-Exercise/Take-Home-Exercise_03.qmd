@@ -1,10 +1,23 @@
 ---
 title: "Take-Home-Exercise_03"
+date: 14 Feb 2023
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
 ---
+
+In this exercise, we will explore Singapore's flat resale data. The data was extracted from Singstat.
+
+### Load Data & Library
+
+First, load the necessary libraries using pacman.
 
 ```{r}
 pacman::p_load(plotly, DT, patchwork, ggstatsplot, tidyverse)
 ```
+
+In this exploration, we will focus on 2022 resale records, and 3/4/5-room flat type only. Based on Singapore's area plan, each town has been grouped as "North-East", "Central", "East", "North" and "West". For detailed list of each town in respective region, you may refer to code below.
 
 ```{r}
 data <- read_csv("data/resale-flat-prices-based-on-registration-date-from-jan-2017-onwards.csv")
@@ -17,95 +30,145 @@ resale_data <- data %>%
                      town %in% c("BUKIT BATOK", "BUKIT PANJANG", "CHOA CHU KANG", "CLEMENTI", "JURONG EAST", "JURONG WEST") ~ "West")) %>%
   filter(flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM")) %>%
   filter(month >= '2022-01' & month <='2022-12')
-
-resale_data
   
 ```
 
-Assumption
+### Distribution of Resale Price
 
--   No segmentation in housing types; just multiple, only segmentation is in room type (3-room, 4-room, 5-room)
+To start with, let's see the distribution of resale price by region. Histogram is a good visualization method to see the trend of price range. Each count of resale data in 2022 were plotted to this histogram. All the price range follows SGD (\$).
 
--   Study focusing on 2022 only
-
--   Q. Can I segment each town by ... region?
-
+To plot a histogram, you can use geom_histogram(). As we need to compare the spread of each histogram, you may set alpha value so that each plot will look translucent. You may also set different bins value. Bigger bins value will result in smoother histogram. When hovering over the histogram, you will find details of each sales count in a tooltip.
 
 ```{r}
 library(ggplot2)
-library(plotly)
-# data aggregation
-
-# Grouped
-p1 <- ggplot(resale_data, aes(fill=flat_type, y=resale_price, x=region)) + 
-    geom_bar(position="dodge", stat = "summary", fun = "mean")
-
-ggplotly(p1, tooltips = c("x", "y", "fill"))
-
-p1
+library(scales)
+p <- ggplot(resale_data, aes(x = resale_price, fill = region)) +
+  geom_histogram(position = "identity", alpha = 0.3, bins = 100) +
+  labs(title = "Resale Price Distribution by Region",
+       x = "Resale Price",
+       y = "Frequency") +
+  scale_x_continuous(labels = comma)
+  ggplotly(tooltip = c("fill", "x", "y"))
 
 ```
-Pattern: 
+
+**Key findings:**
+
+-   Central has the widest resale price range, meaning that price difference gap is wide in this area.
+
+-   North, North-East and West area has narrow resale price range, indicating that resale price of these areas could have been rationalized.
+
+### Closer Look by Region & Flat Type
+
+Moving forward to take a closer look at each region, the histogram will be split by region and by flat type - 3/4/5-room. To effectively see the necessary statistic trends, a boxplot chart is an appropriate choice to plot the data. In this boxplot chart, you can see the percentile information, outliers and spread of resale price records. In ggplot, you can set fill value as flat_type to see resale price by region and by flat type.
 
 ```{r}
 library(plotly)
 
-p2 <- ggplot(data=resale_data, aes(x=region, y=resale_price, fill=flat_type)) +
-  geom_boxplot()
+p1 <- ggplot(data=resale_data, aes(x=region, y=resale_price, fill=flat_type)) +
+  geom_boxplot() +
+  labs(title = "Resale Price by Region and Flat Type",
+       x = "Region",
+       y = "Resale Price") +
+  scale_y_continuous(labels = comma)
 
-ggplotly(p2, tooltips = c("x", "y", "fill", "Town:", "Town:", paste("Town:", town), "Resale Price:", "Resale Price:", paste("Resale Price:", resale_price)))
-
-               
-p2
 ```
 
+**Key findings**:
+
+-   Central area has extreme outliers, especially in 5-room type flats. These outliers could be the reason of wide spread in Central area's resale price distribution.
+
+-   Generally, 3-room type flats' resale prices are pretty much regularized, compared to 4 or 5 rooms flats. As in the box plot, mean of 3-room type flats in each region are distributed at the similar price range.
+
+-   North region has the least outliers compared to the rest of regions. It could be due to a lot of HDB residences, whose price is rationalized by the government.
+
+### Resale Types by Singapore Region
+
+Based on key findings from resale price by region and by flat type, the count of resale records could have affected the mean and spread of flat price. Stacked bar chart will show the percentage of 3/4/5-room type in each region.
+
+To plot stacked bar plots, you can use geom_bar() and set position as "fill". Since we are counting the number of sales record, stat will be set as "count". Since we want to know percentage result, y axis will be modified on a 100% scale. Last but not least, you will find details of each sales count in a tooltip by adding ggplotly.
 
 ```{r}
-# library(viridis)
-# library(hrbrthemes)
-# sales count by each town>>make it 100% stacked bar plot
-
-p3 <- ggplot(resale_data, aes(fill = flat_type, y = ..count.., x = region)) +
+p2 <- ggplot(resale_data, aes(fill = flat_type, y = after_stat(count), x = region)) +
   geom_bar(position = "fill", stat = "count") +
+  scale_y_continuous(labels = scales::percent_format()) +
   ggtitle("Resale Types by Singapore Region")
-
-p3
+ggplotly(p2, tooltips = c("x", "y: %{y*100}%", "fill"))
 
 ```
 
+**Key findings**:
 
+-   In all regions, 4-room flat is the most common type of flat. This indicates that 4-room flat may have the highest demand or supply in the resale market.
+
+-   3-room type flat takes the highest percentage in central area, which is almost at the similar share with 4-room type. This observation could be due to relatively more expensive flat price and smaller flat size in this area.
+
+### Lease Commence Date and Price
+
+Other than room type, lease commence date may affect the price as well. By using ggscatterstats, we can see the necessary stats information together with scatter plot. It will come together with trend line as well, so that we can see how the resale price changes over time. Similar to previous charts, you may add tooltips to see the data point of outliers.
 
 ```{r}
-
-p4 <- ggscatterstats(
+p3 <- ggscatterstats(
   data = resale_data,
   x = lease_commence_date,
   y = resale_price,
   marginal = FALSE,
-  )
-ggplotly(p4, tooltips = c("x", "y", "text"))
+  ) +
+  labs(title = "Resale Price by Lease Commence Date",
+       x = "Year",
+       y = "Resale Price") +
+  scale_y_continuous(labels = comma)  
+ggplotly(p3, tooltips = c("x", "y", "text"))
+
+```
+
+**Key findings**:
+
+-   Resale price is increasing over time, with significant p-value of less than 0.05.
+
+-   The trend indicates that the newer the flat is the more expensive the resale price is.
+
+### Closer Look at Central & North Region
+
+Based on previous findings, we can tell these two regions - Central and North - are at the most extreme end in terms of well-selling flat types as well as price range. Therefore, we will look into these regions using violin plot. Violin plot can be created by using geom_violin(). You may overlay boxplots to each violin plots using geom_boxplot(). To make the visualization look less crowded, you may set the color of boxplot in monochrome by setting the color attribute as grey.
+
+```{r}
+p4 <- resale_data %>% 
+  filter(region == "Central") %>%
+  ggplot(aes(x=town, y=resale_price, fill=town)) +
+  labs(title = "Resale Price by Town - Central",
+       x = "Town",
+       y = "Resale Price") + 
+  geom_violin() +
+  geom_boxplot(width=0.1, color="grey", alpha=0.2) +
+  scale_y_continuous(labels = comma) +
+  coord_flip()
+
 p4
 
 ```
 
 ```{r}
+p5 <- resale_data %>% 
+  filter(region == "North") %>%
+  ggplot(aes(x=town, y=resale_price, fill=town)) +
+  labs(title = "Resale Price by Town - North",
+       x = "Town",
+       y = "Resale Price") + 
+  geom_violin() +
+  geom_boxplot(width=0.1, color="grey", alpha=0.2) +
+  scale_y_continuous(labels = comma) +
+  coord_flip()
 
-
+p5
 ```
 
-https://r-graph-gallery.com/48-grouped-barplot-with-ggplot2
+**Key findings**:
 
-https://bookdown.org/kdonovan125/ibis_data_analysis_r4/creating-graphs-with-ggplot2.html
+-   Spread of resale price is wide in all Central area towns
 
+-   Among the towns in Central area, Geylang has the lowest median and thicker base in its violin plot. It indicates that this area is relatively more affordable in the Central area.
 
-to uncover the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore by using appropriate analytical visualisation techniques learned in Lesson 4: Fundamentals of Visual Analytics. Students are encouraged to apply appropriate interactive techniques to enhance user and data discovery experiences.
+-   Bukit Timah and Bukit Mera have less curvy shape in their violins. It may indicate that their price is relatively stable than the other towns.
 
-For the purpose of this study, the focus should be on **3-ROOM, 4-ROOM and 5-ROOM types**. You can **choose to focus on either one housing type or multiple housing types.** The study period should be on **2022**.
-
-The write-up of the take-home exercise should include but not limited to the followings:
-
--   Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.
-
--   A reproducible description of the procedures used to prepare the analytical visualisation. Please refer to the peer submission I shared.
-
--   A write-up of not more than 100 words to discuss the patterns reveal by each analytical visualisation prepared.
+-   In North region, spread of resale price is less extreme than Central area. - Yishun has outliers in resale price. Based on previous finding from lease commence date chart, we may investigate further to see if Yishun have newer residential area plans, which may resulted in many outliers here.
