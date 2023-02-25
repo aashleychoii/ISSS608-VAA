@@ -2,7 +2,7 @@
 title: "Take-Home-Exercise_04"
 ---
 
-1. Data Rangling
+1.  Data Rangling
 
 ```{r}
 #Unpivot the data
@@ -46,6 +46,7 @@ exports_transpose <- exports_recent %>%
 
 head(exports_transpose)
 ```
+
 ```{r}
 export_line <- ggplot(exports_transpose, aes(x = Months, y = Exports, color = "Data Series")) +
   geom_line() +
@@ -53,7 +54,6 @@ export_line <- ggplot(exports_transpose, aes(x = Months, y = Exports, color = "D
 
 export_line
 ```
-
 
 ```{r}
 
@@ -81,16 +81,11 @@ ggplot(data_all, aes(x = "Months", color = c("\\s\\w+.x", "\\s\\w+.y"))) +
   theme_bw()
 ```
 
-
-
-
 For the purpose of this take-home exercise, Merchandise Trade provided by Department of Statistics, Singapore (DOS) will be used. The data are available under the sub-section of Merchandise Trade by Region/Market. You should download the data by clicking on the link Download all in Excel on the same webpage. The study period should be between January 2020 to December 2022.
 
-The Designing Tool
-For the purpose of this take-home exercise, ggplot2 and its extension should be used to design the analytical visualisation. tidyverse family of packages should be used to prepare the data.
+The Designing Tool For the purpose of this take-home exercise, ggplot2 and its extension should be used to design the analytical visualisation. tidyverse family of packages should be used to prepare the data.
 
-The Write-up
-The write-up of the take-home exercise should include but not limited to the followings:
+The Write-up The write-up of the take-home exercise should include but not limited to the followings:
 
 Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.
 
