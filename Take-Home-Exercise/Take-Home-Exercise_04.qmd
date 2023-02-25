@@ -1,0 +1,99 @@
+---
+title: "Take-Home-Exercise_04"
+---
+
+1. Data Rangling
+
+```{r}
+#Unpivot the data
+pacman::p_load(plotly, DT, patchwork, ggstatsplot, tidyverse)
+library(tidyr)
+library(dplyr)
+library(readr)
+```
+
+```{r}
+imports <- read_csv("data/imports.csv")
+exports <- read_csv("data/exports.csv")
+```
+
+```{r}
+imports_recent <- imports %>%
+  select(matches("Data Series|2022\\s\\w+|2021\\s\\w+|2020\\s\\w+"))
+imports_recent
+```
+
+```{r}
+imports_transpose <- imports_recent %>% 
+  pivot_longer(
+    cols = !`Data Series`,
+    names_to = "Months", 
+    values_to = "Imports")
+
+head(imports_transpose)
+```
+
+```{r}
+exports_recent <- exports %>%
+  select(matches("Data Series|2022\\s\\w+|2021\\s\\w+|2020\\s\\w+"))
+
+exports_transpose <- exports_recent %>% 
+  pivot_longer(
+    cols = !`Data Series`,
+    names_to = "Months", 
+    values_to = "Exports"
+    )
+
+head(exports_transpose)
+```
+```{r}
+export_line <- ggplot(exports_transpose, aes(x = Months, y = Exports, color = "Data Series")) +
+  geom_line() +
+  labs(x = "Month", y = "Amount")
+
+export_line
+```
+
+
+```{r}
+
+# merge imports and exports datasets by date
+data_all <- merge(imports_recent, exports_recent, by = "Data Series")
+head(data_all)
+```
+
+```{r}
+data_all_transpose <- data_all %>% 
+  pivot_longer(
+    cols = !`Data Series`,
+    names_to = "Months", 
+    values_to = "Amount"
+    )
+head(data_all_transpose)
+```
+
+```{r}
+# plot line chart of imports and exports
+ggplot(data_all, aes(x = "Months", color = c("\\s\\w+.x", "\\s\\w+.y"))) +
+  geom_line() +
+  labs(x = "Month", y = "Amount") +
+  scale_color_manual(values = c("red", "blue"), labels = c("Imports", "Exports")) +
+  theme_bw()
+```
+
+
+
+
+For the purpose of this take-home exercise, Merchandise Trade provided by Department of Statistics, Singapore (DOS) will be used. The data are available under the sub-section of Merchandise Trade by Region/Market. You should download the data by clicking on the link Download all in Excel on the same webpage. The study period should be between January 2020 to December 2022.
+
+The Designing Tool
+For the purpose of this take-home exercise, ggplot2 and its extension should be used to design the analytical visualisation. tidyverse family of packages should be used to prepare the data.
+
+The Write-up
+The write-up of the take-home exercise should include but not limited to the followings:
+
+Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.
+
+A reproducible description of the procedures used to prepare the analytical visualisation. Please refer to the peer submission I shared.
+
+A write-up of not more than 100 words to discuss the patterns reveal by each analytical visualisation prepared
