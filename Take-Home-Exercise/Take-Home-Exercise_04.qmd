@@ -1,8 +1,17 @@
 ---
 title: "Take-Home-Exercise_04"
+date: 26 Feb 2023
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
 ---
 
-1.  Data Rangling
+In this data exploration, we will look into the import and export data sets. The data set has been sourced by Department of Statistics, Singapore (DOS) under Merchandise Trade by Region/Market.
+
+### Import Data
+
+To start, necessary libraries will be loaded, as well as data sets. Import and export data sets will be separately loaded to the work space.
 
 ```{r}
 #Unpivot the data
@@ -17,78 +26,133 @@ imports <- read_csv("data/imports.csv")
 exports <- read_csv("data/exports.csv")
 ```
 
+### Data Wrangling
+
+The data is summarized in table format, however this format is not easy to run data analysis libraries. Therefore, the data wrangling will start from transposing the dataset. Here, I used gather() to transpose data by Data Series column, with Month and Amount.
+
 ```{r}
-imports_recent <- imports %>%
-  select(matches("Data Series|2022\\s\\w+|2021\\s\\w+|2020\\s\\w+"))
-imports_recent
+imports_trans <- gather(imports, "Month", "Import_Amt", -`Data Series`)
+exports_trans <- gather(exports, "Month", "Export_Amt", -`Data Series`)
+
+head(imports_trans)
+head(exports_trans)
+
 ```
 
-```{r}
-imports_transpose <- imports_recent %>% 
-  pivot_longer(
-    cols = !`Data Series`,
-    names_to = "Months", 
-    values_to = "Imports")
+For this exploration, data analysis will only focus on the years from 2020 to 2022. In our data set, the import and export columns are in string. Therefore, the column values need to be converted to numeric. Second, for easier time series plotting, Month columns will be converted to Date variables using as.Date().
 
-head(imports_transpose)
+When you look into the Data Series, you can find that Total Merchandise Exports row is unnecessary as they are summary of the rest of countries. Also, each Data Series has "Thousand Dollars" or "Million Dollars" repetitive. For easier data analysis, we will remove them from Data Series value and leave only continent or country names.
+
+Last but not least, as we are going to focus on recent three years, use filter() to remove unnecessary year rows.
+
+```{r}
+# Convert from string to date value
+imports_mth <- imports_trans %>%
+  mutate(Month = as.Date(paste0(Month, " 01"), format = "%Y %b %d"), Import_Amt = as.numeric(Import_Amt))
+
+exports_mth <- exports_trans %>%
+  mutate(Month = as.Date(paste0(Month, " 01"), format = "%Y %b %d"), Export_Amt = as.numeric(Export_Amt))
+
+# Remove unnecessary rows
+imports_recent <- imports_mth %>%
+  filter(Month > as.Date("2019-12-01") & Month < as.Date("2023-01-01")) %>% 
+  mutate(`Data Series` = str_replace_all(`Data Series`, "\\(|Thousand Dollars|\\)|Million Dollars", "")) %>%
+  filter(`Data Series` != "Total Merchandise Imports ") # to remove total summary row
+
+exports_recent <- exports_mth %>%
+  filter(Month > as.Date("2019-12-01") & Month < as.Date("2023-01-01")) %>% 
+  mutate(`Data Series` = str_replace_all(`Data Series`, "\\(|Thousand Dollars|\\)|Million Dollars", "")) %>%
+  filter(`Data Series` != "Total Merchandise Exports ") # to remove total summary row
+
 ```
 
+Two data sets, imports_recent and exports_recent, will again segmented by two data sets - by continents and by countries.
+
 ```{r}
-exports_recent <- exports %>%
-  select(matches("Data Series|2022\\s\\w+|2021\\s\\w+|2020\\s\\w+"))
+# Import dataset
+continents_imp <- imports_recent %>%
+  filter(`Data Series` %in% c("America ", "Asia ", "Europe ", "Oceania ", "Africa ", "European Union "))
 
-exports_transpose <- exports_recent %>% 
-  pivot_longer(
-    cols = !`Data Series`,
-    names_to = "Months", 
-    values_to = "Exports"
-    )
+countries_imp <- imports_recent %>%
+  filter(!`Data Series` %in% c("America ", "Asia ", "Europe ", "Oceania ", "Africa ", "European Union "))
 
-head(exports_transpose)
+# Export dataset
+continents_exp <- exports_recent %>%
+  filter(`Data Series` %in% c("America ", "Asia ", "Europe ", "Oceania ", "Africa ", "European Union "))
+
+countries_exp <- exports_recent %>%
+  filter(!`Data Series` %in% c("America ", "Asia ", "Europe ", "Oceania ", "Africa ", "European Union "))
 ```
 
+### Exploring time trend with line chart
+
+Line chart is one of the most commonly used plot types to show the time trend. First, load the data using ggplot, then use geom_line() to start plotting line charts.
+
+For x-axis, labels will be converted back to "2022 Dec" format from 2022-12-01. As each data set is segregated by month, x-axis scale will be broken by 1 month. Next, to put all x-axis labels without overlapping, labels will be rotated by 45-degree.
+
+Finally, you can check the details of each time series by hovering to tool tips.
+
 ```{r}
-export_line <- ggplot(exports_transpose, aes(x = Months, y = Exports, color = "Data Series")) +
+library(ggplot2)
+
+# Create the plot
+plt_continent_imp <- ggplot(continents_imp, aes(x = Month, y = Import_Amt, color = `Data Series`)) +
   geom_line() +
-  labs(x = "Month", y = "Amount")
+  labs(title = "Imports by Continent", x = "Month", y = "Import Amount") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%Y %b",
+               limits = as.Date(c("2020-01-01", "2022-12-01"), "%Y-%m-%d")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplotly(plt_continent_imp, tooltip = c("color", "x", "y", "fill"))
 
-export_line
 ```
 
 ```{r}
-
-# merge imports and exports datasets by date
-data_all <- merge(imports_recent, exports_recent, by = "Data Series")
-head(data_all)
-```
-
-```{r}
-data_all_transpose <- data_all %>% 
-  pivot_longer(
-    cols = !`Data Series`,
-    names_to = "Months", 
-    values_to = "Amount"
-    )
-head(data_all_transpose)
-```
-
-```{r}
-# plot line chart of imports and exports
-ggplot(data_all, aes(x = "Months", color = c("\\s\\w+.x", "\\s\\w+.y"))) +
+plt_continent_exp <- ggplot(continents_exp, aes(x = Month, y = Export_Amt, color = `Data Series`)) +
   geom_line() +
-  labs(x = "Month", y = "Amount") +
-  scale_color_manual(values = c("red", "blue"), labels = c("Imports", "Exports")) +
-  theme_bw()
+  labs(title = "Exports by Continent", x = "Month", y = "Export Amount") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%Y %b",
+               limits = as.Date(c("2020-01-01", "2022-12-01"), "%Y-%m-%d")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplotly(plt_continent_exp, tooltip = c("color", "x", "y", "fill"))
+
 ```
 
-For the purpose of this take-home exercise, Merchandise Trade provided by Department of Statistics, Singapore (DOS) will be used. The data are available under the sub-section of Merchandise Trade by Region/Market. You should download the data by clicking on the link Download all in Excel on the same webpage. The study period should be between January 2020 to December 2022.
+**Key findings:**
 
-The Designing Tool For the purpose of this take-home exercise, ggplot2 and its extension should be used to design the analytical visualisation. tidyverse family of packages should be used to prepare the data.
+-   In terms of volume, Asia has the most amount across all continents, in both import and export amount.
 
-The Write-up The write-up of the take-home exercise should include but not limited to the followings:
+-   In 2022 Feb, there was a sudden dip in both import and export amount in Asia.
 
-Describe the selection and designed consideration of the analytical data visualisation used. The discussion should limit to not more than 150 words each.
+-   The sudden dip of import and export in Asia in 2022 Feb may have impacted to be impacted by other continents as well, since other continents especially America, European Union, and Europe also showed similar sudden dip in this period.
 
-A reproducible description of the procedures used to prepare the analytical visualisation. Please refer to the peer submission I shared.
+### Exploring time trend with heat map
 
-A write-up of not more than 100 words to discuss the patterns reveal by each analytical visualisation prepared
+Another way to look into time trend could be using heat map. To see the contrast in more vivid way, selecting colors in extreme end could be an option. However, it is important to choose an appropriate color scheme for people with color vision deficiency.
+
+To plot a heat map, geom_tile() was used. Similarly, x-axis labels were formatted in "2022 Dec" style and rotated 45 degree for better readability.
+
+```{r}
+heat_continent_imp <- ggplot(continents_imp, aes(x = Month, y = `Data Series`, fill = Import_Amt)) +
+  geom_tile() +
+  labs(title = "Imports by Continent", x = "Month", y = "Import Amount", fill = "Import Amount") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%Y %b",
+               limits = as.Date(c("2020-01-01", "2022-12-01"), "%Y-%m-%d")) +
+  scale_fill_gradient(low = "lightgrey", high = "blue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(heat_continent_imp, tooltip = c("x", "y", "fill"))
+
+```
+
+```{r}
+heat_continent_exp <- ggplot(continents_exp, aes(x = Month, y = `Data Series`, fill = Export_Amt)) +
+  geom_tile() +
+  labs(title = "Exports by Continent", x = "Month", y = "Export Amount") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%Y %b",
+               limits = as.Date(c("2020-01-01", "2022-12-01"), "%Y-%m-%d")) +
+  scale_fill_gradient(low = "lightgrey", high = "blue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(heat_continent_exp, tooltip = c("x", "y", "fill"))
+
+```
