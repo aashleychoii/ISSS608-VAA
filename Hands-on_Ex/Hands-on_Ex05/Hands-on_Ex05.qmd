@@ -37,6 +37,7 @@ ggstatsplot::ggcorrmat(
   subtitle = "Four pairs are no significant at p < 0.05"
 )
 ```
+
 ```{r}
 wine.cor <- cor(wine[, 1:11])
 ```
@@ -238,5 +239,3 @@ parallelPlot(wh,
 ```{r}
 
 ```
-
-
