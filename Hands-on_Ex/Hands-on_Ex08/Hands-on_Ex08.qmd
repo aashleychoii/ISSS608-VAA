@@ -34,6 +34,7 @@ GAStech_edges_aggregated <- GAStech_edges %>%
   filter(Weight > 1) %>%
   ungroup()
 ```
+
 ```{r}
 GAStech_graph <- tbl_graph(nodes = GAStech_nodes,
                            edges = GAStech_edges_aggregated, 
@@ -203,7 +204,6 @@ visNetwork(GAStech_nodes,
   visLayout(randomSeed = 123)
 ```
 
-
 ```{r}
 visNetwork(GAStech_nodes,
            GAStech_edges_aggregated) %>%
@@ -213,4 +213,3 @@ visNetwork(GAStech_nodes,
   visLegend() %>%
   visLayout(randomSeed = 123)
 ```
-
