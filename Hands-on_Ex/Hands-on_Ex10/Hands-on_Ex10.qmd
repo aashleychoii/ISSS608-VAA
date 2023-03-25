@@ -148,7 +148,6 @@ Stock40_daily %>%
   theme_tq()
 ```
 
-
 ```{r}
 Stock40_daily %>%
   filter(symbol == "DBSDF") %>% 
@@ -196,7 +195,6 @@ p <- candleStick_plot("DBSDF",
 ggplotly(p)
 ```
 
-
 ```{r}
 
 ```
@@ -208,5 +206,3 @@ ggplotly(p)
 ```{r}
 
 ```
-
-
